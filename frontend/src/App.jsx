@@ -1,7 +1,6 @@
 import Home from "./components/Home";
 import NetworkCreator from "./components/NetworkCreator";
 import AccountDisplay from "./components/AccountDisplay";
-import AvailableBalance from "./components/AvailableBalance";
 import Transfer from "./components/Transfer";
 import NavLink from "./components/NavLink";
 import { AppBar, Typography, Toolbar } from "@mui/material";
@@ -22,7 +21,6 @@ function App() {
           <AccountDisplay />
         </Toolbar>
       </AppBar>
-      <AvailableBalance />
       <Routes>
         <Route index element={<Home />} />
         <Route path="create-network" element={<NetworkCreator />} />

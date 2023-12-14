@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import useMetamaskBalance from "../metamask/useMetamaskBalance";
+import AvailableBalance from "./AvailableBalance";
 
 const web3 = new Web3(window.ethereum);
 
@@ -47,6 +48,7 @@ const Transfer = () => {
       className="flex center justify-around w-4/5 mt-5"
       onSubmit={handleTransfer}
     >
+      <AvailableBalance />
       <FormControl className="w-1/3">
         <InputLabel id="to">To</InputLabel>
         <Select
