@@ -7,8 +7,10 @@ const port = 3000;
 app.listen(port, () => console.log("Listening on port 3000"));
 
 var networkRouter = require("./routes/network");
+var faucetRouter = require("./routes/faucet");
 
 app.use(cors());
 app.use(bodyParser.json());
 
 app.use("/network", networkRouter);
+app.use("/faucet", faucetRouter);
