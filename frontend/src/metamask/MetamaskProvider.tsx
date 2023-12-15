@@ -11,16 +11,20 @@ import Web3 from "web3";
 type MetamaskInfo = {
   account: string;
   balance: string;
+  chainId: string;
 };
 
 export const MetamaskContext = createContext<MetamaskInfo>({
   account: "",
   balance: "",
+  chainId: "",
 });
 
 export const MetamaskProvider = ({ children }: PropsWithChildren) => {
   const [account, setAccount] = useState("");
   const [balance, setBalance] = useState("0");
+  const [chainId, setChainId] = useState("");
+
   useEffect(() => {
     async function handleAccountsChanged(accounts) {
       setAccount(accounts[0]);
@@ -31,14 +35,21 @@ export const MetamaskProvider = ({ children }: PropsWithChildren) => {
       const balanceInEther = Web3.utils.fromWei(balance, "ether");
       setBalance(balanceInEther);
     }
+    const handleChainChanged = () => {
+      setChainId(window.ethereum.networkVersion);
+    };
     window.ethereum
       .request({ method: "eth_requestAccounts" })
-      .then((accounts) => {
-        handleAccountsChanged(accounts);
-      });
+      .then(handleAccountsChanged);
     window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+    window.ethereum.request({ method: "eth_chainId" }).then(setChainId);
+
+    window.ethereum.on("chainChanged", setChainId);
+
     return () => {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+      window.ethereum.removeListener("chainChanged", setChainId);
     };
   }, []);
 
@@ -46,8 +57,9 @@ export const MetamaskProvider = ({ children }: PropsWithChildren) => {
     () => ({
       account,
       balance,
+      chainId,
     }),
-    [account, balance]
+    [account, balance, chainId]
   );
 
   return (
