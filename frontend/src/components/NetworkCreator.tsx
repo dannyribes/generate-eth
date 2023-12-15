@@ -52,11 +52,11 @@ const NetworkCreator = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    fetch("http://localhost:3434/network", {
+    fetch("http://localhost:3000/network", {
       method: "POST",
       body: JSON.stringify({
-        networkId,
-        chainId,
+        id: networkId,
+        chainId: Number(chainId),
         subnet,
         ipBootnode,
         nodes,
