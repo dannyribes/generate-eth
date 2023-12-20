@@ -1,9 +1,8 @@
 import { useContext } from "react";
-import { MetamaskContext } from "./MetamaskProvider";
+import { MetamaskBalanceContext } from "./MetamaskProvider";
 
 const useMetamaskBalance = () => {
-  const metamaskInfo = useContext(MetamaskContext);
-  return metamaskInfo.balance;
+  return useContext(MetamaskBalanceContext);
 };
 
 export default useMetamaskBalance;

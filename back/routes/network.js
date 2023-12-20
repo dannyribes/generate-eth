@@ -28,11 +28,12 @@ router.post("/", (req, res) => {
 
     fs.writeFileSync(`${pathNetwork}/password.txt`, createPassword(network));
 
-    createCuentaBootnode(pathNetwork);
     fs.writeFileSync(
       `${pathNetwork}/genesis.json`,
       JSON.stringify(createGenesis(network), null, 4)
     );
+
+    createCuentaBootnode(pathNetwork);
 
     fs.writeFileSync(
       `${pathNetwork}/docker-compose.yml`,

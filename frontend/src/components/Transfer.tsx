@@ -11,6 +11,7 @@ import {
 import useMetamaskBalance from "../metamask/useMetamaskBalance";
 import AvailableBalance from "./AvailableBalance";
 import useMetamaskChainId from "../metamask/useMetamaskChainId";
+import useMetamaskRefreshBalance from "../metamask/useMetamaskRefreshBalance";
 
 const web3 = new Web3(window.ethereum);
 
@@ -20,7 +21,8 @@ const Transfer = () => {
   const [amount, setAmount] = useState("");
   const balance = useMetamaskBalance();
   const chainId = useMetamaskChainId();
-  const handleTransfer = (e) => {
+  const refreshBalance = useMetamaskRefreshBalance();
+  const handleTransfer = async (e) => {
     e.preventDefault();
     const amountWei = web3.utils.toWei(amount, "ether");
     const transactionObject = {
@@ -31,7 +33,8 @@ const Transfer = () => {
       gas: 21000,
       gasPrice: "0x2540be400",
     };
-    web3.eth.sendTransaction(transactionObject);
+    await web3.eth.sendTransaction(transactionObject);
+    refreshBalance();
   };
 
   const error = parseFloat(amount) > parseFloat(balance);

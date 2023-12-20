@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
   PropsWithChildren,
   createContext,
@@ -8,17 +8,12 @@ import {
 } from "react";
 import Web3 from "web3";
 
-type MetamaskInfo = {
-  account: string;
-  balance: string;
-  chainId: string;
-};
-
-export const MetamaskContext = createContext<MetamaskInfo>({
-  account: "",
-  balance: "",
-  chainId: "",
-});
+export const MetamaskAccountContext = createContext("");
+export const MetamaskBalanceContext = createContext("0");
+export const MetamaskChainIdContext = createContext("");
+export const MetamaskRefreshBalanceContext = createContext<() => void>(
+  () => {}
+);
 
 export const MetamaskProvider = ({ children }: PropsWithChildren) => {
   const [account, setAccount] = useState("");
@@ -53,18 +48,24 @@ export const MetamaskProvider = ({ children }: PropsWithChildren) => {
     };
   }, []);
 
-  const metamaskInfo = useMemo(
-    () => ({
-      account,
-      balance,
-      chainId,
-    }),
-    [account, balance, chainId]
-  );
+  const refreshBalance = useCallback(async () => {
+    const balance = await window.ethereum.request({
+      method: "eth_getBalance",
+      params: [account, "latest"],
+    });
+    const balanceInEther = Web3.utils.fromWei(balance, "ether");
+    setBalance(balanceInEther);
+  }, [account]);
 
   return (
-    <MetamaskContext.Provider value={metamaskInfo}>
-      {children}
-    </MetamaskContext.Provider>
+    <MetamaskAccountContext.Provider value={account}>
+      <MetamaskChainIdContext.Provider value={chainId}>
+        <MetamaskBalanceContext.Provider value={balance}>
+          <MetamaskRefreshBalanceContext.Provider value={refreshBalance}>
+            {children}
+          </MetamaskRefreshBalanceContext.Provider>
+        </MetamaskBalanceContext.Provider>
+      </MetamaskChainIdContext.Provider>
+    </MetamaskAccountContext.Provider>
   );
 };

@@ -1,9 +1,8 @@
 import { useContext } from "react";
-import { MetamaskContext } from "./MetamaskProvider";
+import { MetamaskAccountContext } from "./MetamaskProvider";
 
 const useMetamaskAccount = () => {
-  const metamaskInfo = useContext(MetamaskContext);
-  return metamaskInfo.account;
+  return useContext(MetamaskAccountContext);
 };
 
 export default useMetamaskAccount;

@@ -1,9 +1,8 @@
 import { useContext } from "react";
-import { MetamaskContext } from "./MetamaskProvider";
+import { MetamaskChainIdContext } from "./MetamaskProvider";
 
 const useMetamaskChainId = () => {
-  const metamaskInfo = useContext(MetamaskContext);
-  return metamaskInfo.chainId;
+  return useContext(MetamaskChainIdContext);
 };
 
 export default useMetamaskChainId;
