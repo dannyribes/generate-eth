@@ -20,7 +20,6 @@ const Transfer = () => {
   const [amount, setAmount] = useState("");
   const balance = useMetamaskBalance();
   const chainId = useMetamaskChainId();
-  console.log(chainId);
   const handleTransfer = (e) => {
     e.preventDefault();
     const amountWei = web3.utils.toWei(amount, "ether");
@@ -29,8 +28,8 @@ const Transfer = () => {
       from: senderAddress,
       to: recipientAddress, // Or use recipientAddress for a direct ETH transfer
       value: amountWei,
-      gas: 30000,
-      gasPrice: 3000,
+      gas: 21000,
+      gasPrice: "0x2540be400",
     };
     web3.eth.sendTransaction(transactionObject);
   };

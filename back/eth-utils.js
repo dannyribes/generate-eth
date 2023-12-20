@@ -2,8 +2,12 @@ const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
 
-DIR_BASE = path.join(__dirname, "datos");
-DIR_NETWORKS = path.join(DIR_BASE, "networks");
+const DIR_BASE = path.join(__dirname, "datos");
+const DIR_NETWORKS = path.join(DIR_BASE, "networks");
+
+const nodeIP = "172.16.238.";
+const subnet = "172.16.238.0/24";
+const ipBootnode = "172.16.238.20";
 
 function existsDir(dir) {
   try {
@@ -77,7 +81,7 @@ function createPassword(network) {
   return "12345678";
 }
 
-function createNodeMiner(node) {
+function createNodeMiner(node, i) {
   const miner = `
     ${node.name}:
         image: ethereum/client-go:latest
@@ -90,10 +94,10 @@ function createNodeMiner(node) {
             - geth-bootnode
         networks:
             ethnetwork:
-                ipv4_address: ${node.ip}
+                ipv4_address: ${nodeIP + i}
         entrypoint: sh -c 'geth init 
             /root/genesis.json && geth   
-            --nat "extip:${node.ip}"
+            --nat "extip:${nodeIP + i}"
             --netrestrict=\${SUBNET} 
             --bootnodes="\${BOOTNODE}"
             --miner.etherbase \${ETHERBASE}   
@@ -121,7 +125,7 @@ function createBootnode(network) {
   return bootnode;
 }
 
-function createNodeRpc(node) {
+function createNodeRpc(node, i) {
   const rpc = `
     ${node.name}:
         image: ethereum/client-go:latest
@@ -132,24 +136,24 @@ function createNodeRpc(node) {
              - geth-bootnode
         networks:
             ethnetwork:
-                    ipv4_address: ${node.ip}
+                    ipv4_address: ${nodeIP + i}
         ports:
-            - "${node.port}:8545"
+            - "8545:8545"
         entrypoint: sh -c 'geth init 
             /root/genesis.json && geth     
             --netrestrict=\${SUBNET}    
             --bootnodes="\${BOOTNODE}"
-            --nat "extip:${node.ip}"
+            --nat "extip:${nodeIP + i}"
             --http 
             --http.addr "0.0.0.0" 
-            --http.port ${node.port} 
+            --http.port 8545 
             --http.corsdomain "*" 
             --http.api "admin,eth,debug,miner,net,txpool,personal,web3"'
     `;
   return rpc;
 }
 
-function createNodeNormal(node) {
+function createNodeNormal(node, i) {
   const n = `
     ${node.name}:
         image: ethereum/client-go:latest
@@ -160,23 +164,23 @@ function createNodeNormal(node) {
             - geth-bootnode
         networks:
             ethnetwork:
-                    ipv4_address: ${node.ip}
+                    ipv4_address: ${nodeIP + i}
         entrypoint: sh -c 'geth init 
             /root/genesis.json && geth   
             --bootnodes="\${BOOTNODE}"
-            --nat "extip:${node.ip}"
+            --nat "extip:${nodeIP + i}"
             --netrestrict=\${SUBNET}  ' `;
   return n;
 }
 
-function createNode(node) {
+function createNode(node, i) {
   switch (node.type) {
     case "miner":
-      return createNodeMiner(node);
+      return createNodeMiner(node, i);
     case "rpc":
-      return createNodeRpc(node);
+      return createNodeRpc(node, i);
     case "normal":
-      return createNodeNormal(node);
+      return createNodeNormal(node, i);
   }
 }
 function createDockerCompose(network) {
@@ -184,7 +188,7 @@ function createDockerCompose(network) {
 version: '3'
 services:
 ${createBootnode(network)}
-${network.nodes.map((node) => createNode(node)).join("\n")}
+${network.nodes.map((node, i) => createNode(node, i + 2)).join("\n")}
 networks:
   ethnetwork:
     driver: bridge
@@ -200,12 +204,12 @@ function createEnv(network) {
   const pathNetwork = path.join(DIR_NETWORKS, network.id);
   let bootnode = `enode://${fs
     .readFileSync(`${pathNetwork}/bootnode`)
-    .toString()}@${network.ipBootnode}:0?discport=30301`;
+    .toString()}@${ipBootnode}:0?discport=30301`;
   bootnode = bootnode.replace("\n", "");
   const file = `
 BOOTNODE=${bootnode}
-SUBNET=${network.subnet}
-IPBOOTNODE=${network.ipBootnode}
+SUBNET=${subnet}
+IPBOOTNODE=${ipBootnode}
 ETHERBASE=${fs.readFileSync(`${pathNetwork}/address.txt`).toString().trim()}
 UNLOCK=${fs.readFileSync(`${pathNetwork}/address.txt`).toString().trim()}
 `;
@@ -230,4 +234,6 @@ module.exports = {
   createDockerCompose,
   createGenesis,
   createPassword,
+  DIR_NETWORKS,
+  DIR_BASE,
 };
