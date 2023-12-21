@@ -33,6 +33,13 @@ router.post("/", (req, res) => {
       `${pathNetwork}/genesis.json`,
       JSON.stringify(createGenesis(network), null, 4)
     );
+    //------------------------------------------------------------
+    fs.writeFileSync(`./env.txt`, id);
+
+    
+
+
+      
 
     fs.writeFileSync(
       `${pathNetwork}/docker-compose.yml`,

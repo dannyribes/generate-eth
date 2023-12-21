@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+back/env
+back/env.txt
+back/yarn.lock
